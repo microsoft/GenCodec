@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual env
+.env
+.venv
+env/
+venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyTorch checkpoints
+*.pth
+*.pt
+*.ckpt
+
+# Logs
+*.log
+logs/
+wandb/
+lightning_logs/
+tensorboard/
+events.out.tfevents*
+
+# Datasets / Large files
+*.zip
+*.tar
+*.tar.gz
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# aml
+aml/amlt_config.py
+aml/unmount_mount.sh
+
+*/tmp/
+*/pretrained/
+*/output/

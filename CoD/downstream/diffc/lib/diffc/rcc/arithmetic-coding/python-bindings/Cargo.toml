@@ -1,0 +1,18 @@
+[package]
+name = "zipf_encoding"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "zipf_encoding"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.18.3", features = ["extension-module"] }
+arithmetic-coding = { path = ".." }
+bitstream-io = "2.0.0"
+thiserror = "1.0.30"
+
+[features]
+extension-module = ["pyo3/extension-module"]
+default = ["extension-module"]

@@ -1,0 +1,111 @@
+# CoD Pixel-Space Training: bpp=0.00024, resolution=512, PixNerDiT
+# Stage 2: Finetune at 512x512 from stage 1 checkpoint
+seed_everything: true
+tags:
+  exp: CoD
+torch_hub_dir: pretrained/torch_hub
+pretrained_ckpt_path: null
+
+trainer:
+  default_root_dir: ~
+  accelerator: auto
+  strategy: auto
+  devices: auto
+  num_nodes: 1
+  precision: bf16-mixed
+  num_sanity_val_steps: 0
+  check_val_every_n_epoch: null
+  inference_mode: true
+  use_distributed_sampler: false
+  accumulate_grad_batches: 1
+  max_steps: 100000
+  val_check_interval: 10000
+  callbacks:
+    - class_path: cod.callbacks.model_checkpoint.CheckpointHook
+      init_args:
+        every_n_train_steps: 10000
+        save_top_k: -1
+        save_last: true
+    - class_path: cod.callbacks.save_images.SaveImagesHook
+      init_args:
+        save_dir: eval
+        save_compressed: true
+
+model:
+  latent: false
+  denoiser:
+    class_path: cod.models.pixel_dit.PixNerDiT
+    init_args:
+      in_channels: 3
+      patch_size: 16
+      num_groups: 16
+      hidden_size_x: 64
+      hidden_size: &hidden_size 1152
+      num_blocks: 30
+      num_cond_blocks: 26
+      nerf_mlpratio: 2
+      ds: 128
+      codebook_bits: 4
+      up2x: true
+  vae:
+    class_path: cod.models.autoencoder.PixelAE
+    init_args:
+      scale: 1.0
+  conditioner:
+    class_path: cod.models.autoencoder.PixelConditioner
+  diffusion_trainer:
+    class_path: cod.diffusion.REPATrainer
+    init_args:
+      lognorm_t: true
+      encoder:
+        class_path: cod.models.utils.encoder.DINOv2
+        init_args:
+          weight_path: pretrained/torch_hub/facebookresearch_dinov2_main/dinov2_vitb14
+      align_layer: 8
+      proj_denoiser_dim: *hidden_size
+      proj_hidden_dim: *hidden_size
+      proj_encoder_dim: 768
+      recon_dim: [3, 16, 16]
+  diffusion_sampler:
+    class_path: cod.diffusion.EulerSampler
+    init_args:
+      num_steps: 100
+      guidance: 3.0
+      guidance_interval_min: 0.1
+      guidance_interval_max: 1.0
+      scheduler: cod.diffusion.LinearScheduler
+      last_step: 0.04
+      w_scheduler: cod.diffusion.LinearScheduler
+      guidance_fn: cod.diffusion.simple_guidance_fn
+      step_fn: cod.diffusion.ode_step_fn
+  ema_tracker:
+    class_path: cod.callbacks.simple_ema.SimpleEMA
+    init_args:
+      decay: 0.9999
+  optimizer:
+    class_path: torch.optim.AdamW
+    init_args:
+      lr: 2e-5
+      weight_decay: 0.0
+
+data:
+  train_dataset:
+    class_path: cod.data.ImageDataset
+    init_args:
+      root: data/
+      metadata: anno_512/hq_anno.txt
+      resolution: 512
+  eval_dataset:
+    class_path: cod.data.ImageTestDataset
+    init_args:
+      root: test/kodak512/images
+      latent_shape: [3, 512, 512]
+  pred_dataset:
+    class_path: cod.data.ImageTestDataset
+    init_args:
+      root: test/kodak512/images
+      latent_shape: [3, 512, 512]
+  train_batch_size: ~
+  train_num_workers: 16
+  pred_batch_size: 16
+  pred_num_workers: 16

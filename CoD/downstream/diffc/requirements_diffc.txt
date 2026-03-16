@@ -1,0 +1,6 @@
+easydict
+setuptools
+setuptools_rust
+scikit-image
+rust
+cupy
