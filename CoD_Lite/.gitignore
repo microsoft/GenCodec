@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.so
+pretrained/
+*.ckpt
+*.pt
+*.pth
+wandb/
