@@ -1,0 +1,107 @@
+# Finetuned One-Step CoD-Lite: resolution=512, DConv
+# Stage 1: LoRA then full finetune from pretrained CoD checkpoint
+# Per-bpp parameters (ds, codebook_bits) are set via entry script overrides.
+seed_everything: true
+tags:
+  exp: Finetuned_One_Step_CoD
+pretrained_ckpt_path: null
+pretrained_ema: true
+lora_steps: 200000
+full_ft_steps: 200000
+
+trainer:
+  default_root_dir: ~
+  accelerator: auto
+  strategy: auto
+  devices: auto
+  num_nodes: 1
+  precision: bf16-mixed
+  num_sanity_val_steps: 0
+  check_val_every_n_epoch: null
+  inference_mode: true
+  use_distributed_sampler: false
+  accumulate_grad_batches: 1
+  max_steps: 200000
+  val_check_interval: 10000
+  callbacks:
+    - class_path: cod.callbacks.model_checkpoint.CheckpointHook
+      init_args:
+        every_n_train_steps: 10000
+        keep_every_n_steps: 50000
+        save_top_k: -1
+        save_last: true
+    - class_path: cod.callbacks.save_images.SaveImagesHook
+      init_args:
+        save_dir: eval
+        save_compressed: true
+
+model:
+  latent: false
+  vae:
+    class_path: cod.models.autoencoder.PixelAE
+    init_args:
+      scale: 1.0
+  conditioner:
+    class_path: cod.models.autoencoder.PixelConditioner
+  net:
+    class_path: finetuned_one_step_codec.main_stage1.FinetunedOneStepCoD
+    init_args:
+      pred: x
+      in_channels: 3
+      patch_size: 16
+      hidden_size_x: 32
+      hidden_size: &hidden_size 384
+      num_blocks: 24
+      num_cond_blocks: 21
+      light: true
+      net_ckpt_path: ~
+      pretrain_prefix: ema_denoiser.
+      ds: 32
+      codebook_bits: 4
+      up2x: true
+  codec_trainer:
+    class_path: finetuned_one_step_codec.main_stage1.FinetunedOneStepCoDTrainer
+    init_args:
+      net_loss_weight: 1.0
+      net_loss:
+        class_path: finetuned_one_step_codec.training.training.OneStepCoDModelLoss
+        init_args:
+          feat_loss_weight: 0.5
+          encoder:
+            class_path: cod.models.utils.encoder.DINOv2
+            init_args:
+              weight_path: pretrained/torch_hub/facebookresearch_dinov2_main/dinov2_vitb14
+          align_layer: 8
+          proj_denoiser_dim: *hidden_size
+          proj_hidden_dim: *hidden_size
+          proj_encoder_dim: 768
+          net_loss_ckpt_path: ~
+      lpips_vgg_weight: 1.0
+      lpips_alex_weight: 0.5
+  optimizer:
+    class_path: torch.optim.AdamW
+    init_args:
+      lr: 1e-4
+      weight_decay: 0.0
+
+data:
+  train_dataset:
+    class_path: cod.data.ImageDataset
+    init_args:
+      root: ~
+      metadata: anno_512/hq_anno.txt
+      resolution: 512
+  eval_dataset:
+    class_path: cod.data.ImageTestDataset
+    init_args:
+      root: test/kodak512/images
+      latent_shape: [3, 512, 512]
+  pred_dataset:
+    class_path: cod.data.ImageTestDataset
+    init_args:
+      root: test/kodak512/images
+      latent_shape: [3, 512, 512]
+  train_batch_size: ~
+  train_num_workers: 16
+  pred_batch_size: 16
+  pred_num_workers: 16

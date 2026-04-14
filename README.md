@@ -24,6 +24,11 @@ This repository hosts models, code, and evaluation tools for our published gener
   - Supports both pixel-space and latent-space diffusion under a unified architecture
   - Downstream applications: zero-shot variable-rate coding (DiffC), one-step coding, perceptual loss
 
+- [`CoD_Lite`](CoD_Lite) — **CoD-Lite: Real-Time Diffusion-Based Generative Image Compression** [[arXiv]](https://arxiv.org/abs/2604.12525) [[Models]](https://huggingface.co/zhaoyangjia/CoD_Lite)
+  - Lightweight real-time codec: 28M encoder + 52M decoder & 60 FPS encoding / 42 FPS decoding at 1080p on a single A100 GPU
+  - Powered by a one-step pixel-space convolutional diffusion-based decoding framework.
+  - Effective training pipeline: Compression-oriented diffusion pre-train → Distillation-guided and adversarial one-step fine-tune
+
 ## License
 
 GenCodec is MIT licensed, as found in the [LICENSE](LICENSE) file.
@@ -37,6 +42,13 @@ If you find this work useful, please cite the relevant project:
     title     = {CoD: A Diffusion Foundation Model for Image Compression},
     author    = {Jia, Zhaoyang and Zheng, Zihan and Xue, Naifu and Li, Jiahao and Li, Bin and Guo, Zongyu and Zhang, Xiaoyi and Li, Houqiang and Lu, Yan},
     booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    year      = {2026}
+}
+
+@article{jia2026codlite,
+    title     = {Real-Time Diffusion-Based Generative Image Compression},
+    author    = {Jia, Zhaoyang and Xue, Naifu and Zheng, Zihan and Li, Jiahao and Li, Bin and Zhang, Xiaoyi and Guo, Zongyu and Zhang, Yuan and Li, Houqiang and Lu, Yan},
+    journal   = {arXiv preprint arXiv:2604.12525},
     year      = {2026}
 }
 ```
