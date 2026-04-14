@@ -1,5 +1,5 @@
 lightning==2.5.0.post0
-torch==2.5.0
+torch==2.8.0
 torchvision==0.20.0
 jsonargparse[signatures]>=4.27.7
 einops
