@@ -27,7 +27,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
@@ -39,4 +39,4 @@ jobs:
           echo Add other actions to build,
           echo test, and deploy your project.
       - name: Component Detection dependency submission action
-        uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
+        uses: advanced-security/component-detection-dependency-submission-action@1874d0f72d77ddf201936b16a90f28b237709753 # v0.0.6
