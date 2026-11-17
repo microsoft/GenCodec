@@ -1,4 +1,4 @@
 # Optional ONNX/OpenVINO backends; install after requirements.txt.
-onnx==1.18.0
+onnx==1.22.0
 openvino==2026.0.0
 ninja==1.13.0
